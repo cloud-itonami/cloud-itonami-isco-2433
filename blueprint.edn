@@ -1,0 +1,11 @@
+[{:itonami.blueprint/id "cloud-itonami-isco-2433"
+  :itonami.blueprint/name "Community Technical Sales Practice"
+  :itonami.blueprint/isco-08 "2433"
+  :itonami.blueprint/domain :business/technical-sales
+  :itonami.blueprint/license "AGPL-3.0-or-later"
+  :itonami.blueprint/social-impact [:fair-dealing :small-business-support :local-jobs]
+  :itonami.blueprint/governor :technical-sales-governor
+  :itonami.blueprint/robotics true
+  :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger]
+  :itonami.blueprint/status :public-oss
+  :db/id -1}]

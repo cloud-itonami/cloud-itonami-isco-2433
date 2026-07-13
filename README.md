@@ -5,14 +5,26 @@ Open Business Blueprint for **ISCO-08 2433**: Technical and Medical Sales Profes
 pure-cognitive work, the LLM-first wave, **no robotics gate** —
 eligible for actor implementation now.
 
-**Maturity: `:blueprint`** — blueprint only; **no actor implementation
-yet**, and none is claimed. The implemented actor will follow the
-fleet-standard pattern (advisor-LLM sealed behind the independent
-`:technical-sales-governor` governor, human approval workflow, append-only
-audit ledger); outbound contact (sales outreach, call returns) is
-always :external-send and never auto-committed, and personal records
-stay privacy-first. Sixth wave-0 cognitive batch (ADR-2607122700
-addenda).
+**Maturity: `:implemented`** — TechnicalMedicalSalesAdvisor ⊣
+TechnicalMedicalSalesGovernor as a langgraph StateGraph
+(`intake → advise → govern → decide → commit/hold`, human-approval
+interrupt), modeled on cloud-itonami-isco-4311's bookkeeping actor.
+13 tests / 27 assertions green.
+
+The medical-sales HARD invariants — subset containment and
+conditional membership, not sales technique:
+
+1. **Indication subset** — the proposed claimed-indications set must
+   be a subset of the product's registered approved-indications set.
+   Off-label marketing is a subset violation, not a sales technique.
+2. **Licensed-buyer gate** — if the product is registered restricted,
+   the buyer must be a member of the client's registered
+   licensed-buyers set (unrestricted products have no such gate).
+
+Also HARD: unregistered/foreign product, unregistered organization,
+non-`:propose` effect. Escalations (always human sign-off):
+`:approve-bulk-order` (large-quantity order, elevated diversion risk),
+low confidence (< 0.6).
 
 AGPL-3.0-or-later, forkable by any qualified operator. Part of the
 [cloud-itonami](https://itonami.cloud) open business fleet.

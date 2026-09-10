@@ -43,36 +43,36 @@ the set it is checked against is not gated by it.
 
 ## Components
 
-- `src/medsales/store.cljc` — `Store` protocol + `MemStore`: registered
+- `src/medsales/store.kotoba` — `Store` protocol + `MemStore`: registered
   clients, registered products (`:approved-indications`,
   `:restricted?`), registered licensed buyers, committed sale records,
   and a hash-chained append-only audit ledger.
-- `src/medsales/advisor.cljc` — `Advisor` protocol; `mock-advisor`
+- `src/medsales/advisor.kotoba` — `Advisor` protocol; `mock-advisor`
   (deterministic, default) and `llm-advisor`. Either way the advisor
   only ever produces a `:propose`-effect proposal, and LLM parse
   failures yield `confidence 0.0` — forced escalation, never
   fabricated confidence.
-- `src/medsales/operation.cljc` — the **closed vocabulary**. `supported`
+- `src/medsales/operation.kotoba` — the **closed vocabulary**. `supported`
   is the allowlist of what the actor may propose; `reserved` names
   authority it does not hold (defining an approved indication, granting
   a buyer licence, inducing a prescriber, shipping stock, binding the
   client contractually, making a clinical claim, destroying the record)
   with a stated reason for each. An op in neither map is refused as
   `:undeclared-op`.
-- `src/medsales/facts.cljc` — one named, pure predicate per question the
+- `src/medsales/facts.kotoba` — one named, pure predicate per question the
   governor asks, each testable without building a graph.
-- `src/medsales/governor.cljc` — `check`: a pure function wired as its
+- `src/medsales/governor.kotoba` — `check`: a pure function wired as its
   own `:govern` node. It holds the ORDER of the questions; each
   question lives in `facts`, over the vocabulary in `operation`.
-- `src/medsales/phase.cljc` — the verdict → phase routing, and what each
+- `src/medsales/phase.kotoba` — the verdict → phase routing, and what each
   phase may do. `:hard?` is checked before `:escalate?`: a proposal
   that is both must hold, because escalating it would ask a human to
   approve something they cannot authorise.
-- `src/medsales/ledger.cljc` — entry construction, hash chaining and
+- `src/medsales/ledger.kotoba` — entry construction, hash chaining and
   verification. Every write records **who approved it** (`:actor` or
   `:human`), which is what the interrupt exists to establish.
-- `src/medsales/actor.cljc` — the compiled `StateGraph`.
-- `src/medsales/sim.cljc` — the governed-scenario harness.
+- `src/medsales/actor.kotoba` — the compiled `StateGraph`.
+- `src/medsales/sim.kotoba` — the governed-scenario harness.
 
 ## Running it
 

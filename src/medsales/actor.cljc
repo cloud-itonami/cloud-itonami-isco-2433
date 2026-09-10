@@ -21,7 +21,16 @@
             [langgraph.checkpoint :as cp]
             [medsales.advisor :as advisor]
             [medsales.governor :as governor]
+            [medsales.ledger :as led]
+            [medsales.phase :as phase]
             [medsales.store :as store]))
+
+(defn- append-chained!
+  "Append `m` to the store's ledger as a chained entry. The chain is built here
+  because this is where the previous hash is known; `store/append-ledger!`
+  appends what it is given."
+  [st m]
+  (store/append-ledger! st (led/entry (store/ledger st) m)))
 
 (defn build-graph
   "Build a compiled TechnicalMedicalSalesActor graph. `store` implements
@@ -53,24 +62,28 @@
                         :audit [{:node :govern :verdict v}]})))
       (g/add-node :decide
                    (fn [{:keys [verdict]}]
-                     {:disposition (cond
-                                     (:hard? verdict) :hold
-                                     (:escalate? verdict) :request-approval
-                                     :else :commit)}))
+                     {:disposition (phase/of-verdict verdict)}))
       (g/add-node :request-approval (fn [s] s))
       (g/add-node :commit
-                   (fn [{:keys [request proposal]}]
+                   (fn [{:keys [request proposal disposition]}]
                      (let [record {:client-id (:client-id request)
-                                    :op (:op proposal)
-                                    :product-id (:product-id proposal)
-                                    :payload proposal}]
+                                   :op (:op proposal)
+                                   :product-id (:product-id proposal)
+                                   :buyer-id (:buyer-id proposal)
+                                   :payload proposal}
+                           ;; The commit node is reached either directly (the
+                           ;; governor admitted it) or from the interrupted
+                           ;; :request-approval node (a human resumed the
+                           ;; thread). `:disposition` still carries which,
+                           ;; because :request-approval does not overwrite it.
+                           approved-by (if (phase/approved-commit? disposition) :human :actor)]
                        (store/commit-record! store record)
-                       (store/append-ledger! store {:disposition :commit :record record})
+                       (append-chained! store (led/commit-entry record approved-by))
                        {:record record
-                        :audit [{:node :commit :record record}]})))
+                        :audit [{:node :commit :record record :approved-by approved-by}]})))
       (g/add-node :hold
                    (fn [{:keys [verdict]}]
-                     (store/append-ledger! store {:disposition :hold :verdict verdict})
+                     (append-chained! store (led/hold-entry verdict))
                      {:audit [{:node :hold :verdict verdict}]}))
       (g/set-entry-point :intake)
       (g/add-edge :intake :advise)

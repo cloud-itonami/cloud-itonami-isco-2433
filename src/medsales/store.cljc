@@ -20,7 +20,13 @@
                      buyer roster serves many restricted products).
     record         — a committed operating record (approved sale) —
                      written ONLY via commit-record!.
-    ledger         — append-only audit trail, commit or hold."
+    ledger         — append-only audit trail, commit or hold,
+                     hash-chained by `medsales.ledger`; append through
+                     `append-ledger!` only, which is where the chain is
+                     extended. The chain is what makes 'append-only' a
+                     property of the ARTIFACT rather than of the code path
+                     — before it, any prefix or permutation of this vector
+                     was indistinguishable from the real trail."
   )
 
 (defprotocol Store
@@ -50,6 +56,9 @@
     (swap! a update-in [:licensed-buyers client-id] (fnil conj #{}) buyer-id) s)
   (commit-record! [s record]
     (swap! a update :records (fnil conj []) record) s)
+  ;; Takes an already-chained entry, built by the caller with
+  ;; `medsales.ledger/entry`. The store appends what it is given; the chain is
+  ;; extended where the previous hash is known.
   (append-ledger! [s fact]
     (swap! a update :ledger (fnil conj []) fact) s))
 

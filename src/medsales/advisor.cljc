@@ -9,7 +9,8 @@
                :effect :propose :product-id str
                :claimed-indications #{str} :buyer-id str :stake kw
                :confidence n :rationale str}"
-  (:require #?(:clj  [clojure.edn :as edn]
+  (:require [medsales.operation :as op]
+            #?(:clj  [clojure.edn :as edn]
                :cljs [cljs.reader :as edn])))
 
 (defprotocol Advisor
@@ -23,7 +24,13 @@
    :buyer-id buyer-id
    :stake (or stake :low)
    :confidence (case (or stake :low) :high 0.7 :medium 0.85 :low 0.95)
-   :rationale (str "proposed " (name op) " for client " (:client-id request))})
+   ;; `op/label` rather than `name`: `(name nil)` throws, and a request
+   ;; carrying `{:op nil}` used to die here with a NullPointerException BEFORE
+   ;; the governor was consulted (measured 2026-09-10 through
+   ;; `medsales.actor/run-request!`). A crash is not a refusal — it leaves no
+   ;; verdict, no hold and no ledger entry. The advisor's job is to hand the
+   ;; governor a proposal it can refuse, including a malformed one.
+   :rationale (str "proposed " (op/label op) " for client " (:client-id request))})
 
 (defn mock-advisor []
   (reify Advisor
@@ -35,7 +42,8 @@
    honest :confidence and a :stake. Never claim an off-label
    indication or sell a restricted product to an unlicensed buyer as
    conforming — the governor checks both against the registered
-   product record.")
+   product record. Propose only operations the governor declares
+   supported; anything else is refused, not negotiated.")
 
 (defn- parse-proposal [content]
   (try

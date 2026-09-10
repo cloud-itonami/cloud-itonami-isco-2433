@@ -11,6 +11,11 @@
          :main-opts    ["-m" "clj-kondo.main"
                         "--lint" "src" "test"
                         "--fail-level" "error"]}
+  ;; The governed-scenario harness. Exits non-zero when the scenario table
+  ;; demonstrates no refusal at all -- a governed actor's claim is that there
+  ;; exist actions it refuses, so a table that stopped refusing is a defect.
+  :sim {:main-opts ["-m" "medsales.sim"]}
+
   :test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd6605cb6c0efc275e1df1736f6e90d4d73"}}

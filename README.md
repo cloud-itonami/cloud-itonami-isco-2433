@@ -77,12 +77,12 @@ the set it is checked against is not gated by it.
 ## Running it
 
 ```bash
-clojure -M:test    # unit tests
-clojure -M:sim     # governed scenario run
-clojure -M:lint    # clj-kondo, errors fail
+kbb -M:test    # unit tests
+kbb -M:sim     # governed scenario run
+kbb -M:lint    # clj-kondo, errors fail
 ```
 
-`clojure -M:sim` runs every scenario through the real StateGraph and
+`kbb -M:sim` runs every scenario through the real StateGraph and
 reports which the governor refused. It **exits non-zero when the table
 demonstrates no refusal at all**: a governed actor's claim is not that
 it acts, it is that there exist actions it refuses, so a table that has

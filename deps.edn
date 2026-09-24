@@ -1,8 +1,16 @@
 {:paths ["src"]
- :deps {io.github.kotoba-lang/langgraph
+ :deps {
+        ;; kotoba.robotics.process: the process-physics solvers and probe this
+        ;; repo's physics.edn runs on (physical-AI bot, scripts/physical-ai-bots).
+        io.github.kotoba-lang/robotics {:local/root "../../kotoba-lang/robotics"}
+io.github.kotoba-lang/langgraph
         {:git/sha "5b4e5e70837b849b14b6a5800894e3be202ad5fa"}}
  :aliases
  {
+  ;; kbb -M:physics -> the physical-AI bot's measurement: runs physics.edn on
+  ;; kotoba.robotics.process and prints one probe map. Exit 2 = could not measure.
+  :physics {:main-opts ["-m" "kotoba.robotics.process.probe"]}
+
   ;; clj-kondo from deps (no binary), errors fail CI. Added because this repo
   ;; could not be linted at all -- across this fleet an absent or broken :lint
   ;; alias is what let misplaced docstrings, dead code and even a false-green

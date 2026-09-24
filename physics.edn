@@ -1,0 +1,43 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; ISCO 2433, technical and medical sales professionals (excluding ICT). The README calls this pure-cognitive work with no robotics
+;; gate; blueprint.edn nevertheless declares :itonami.blueprint/robotics true.
+;; The physical work declared here is the handling the occupation itself
+;; entails (ASSUMPTION, not stated in the README): wheeling a demonstration device on its trolley to the customer's clinic, lifting the demo case onto the exam counter, and keeping refrigerated product samples inside an insulated shipper between visits.
+;; Replace with the README premise once one is written.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-2433"
+ :cases
+ [{:id :demo-device-trolley
+   :kind :transport
+   :procedure "AMR pushes the demonstration device on its trolley from the van bay to the customer's clinic room"
+   :params {:mass-kg 40.0 :distance-m 70.0 :v-max-mps 0.9 :a-max-mps2 0.4
+            :brake-decel-mps2 0.5 :drive-force-n 80.0 :crr 0.02
+            :cog-height-m 0.85 :support-half-length-m 0.30}
+   :sweep {:param :payload-kg :values [20.0 60.0 100.0 150.0 200.0]}
+   :quantity :cycle-time-s
+   :limit {:max 100.0 :basis "estimate: device should reach the clinic room within 100 s to keep the demonstration inside the booked appointment"}
+   :boundary {:lo 5.0 :hi 350.0}}
+  {:id :demo-case-onto-counter
+   :kind :manipulator
+   :procedure "arm lifts the demonstration instrument case from the trolley onto the exam-room counter"
+   :params {:l1-m 0.50 :l2-m 0.45 :m1-kg 5.0 :m2-kg 3.5
+            :from [0.55 -0.25] :to [0.50 0.25] :duration-s 2.5 :steps 500}
+   :sweep {:param :payload-kg :values [2.0 5.0 8.0 12.0 16.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 150.0 :basis "estimate: continuous shoulder torque of a 10 kg-payload class collaborative arm"}
+   :boundary {:lo 0.5 :hi 60.0}}
+  {:id :sample-shipper-wall
+   :kind :thermal
+   :procedure "insulated shipper wall carrying refrigerated product samples through an 8-hour sales day in a 35 C car"
+   :params {:conductivity-w-mk 0.025 :density-kg-m3 35.0 :specific-heat-j-kgk 1400.0
+            :t0-c 4.0 :t-hot-c 35.0 :h-front-w-m2k 10.0 :t-back-ambient-c 4.0 :h-back-w-m2k 5.0
+            :threshold-c 8.0 :duration-s 28800.0 :nodes 11}
+   :sweep {:param :thickness-m :values [0.01 0.02 0.03 0.04 0.06]}
+   :quantity :final-back-c
+   :limit {:max 8.0 :basis "2-8 C refrigerated range for time- and temperature-sensitive pharmaceutical products (WHO Technical Report Series No. 961, Annex 9); inner wall face used as the proxy for the product (estimate: coolant-pack interior held at 4 C)"}
+   :boundary {:lo 0.005 :hi 0.08}}]}

@@ -1,7 +1,7 @@
 (ns medsales.governor
   "TechnicalMedicalSalesGovernor — the independent safety/traceability layer
   for the ISCO-08 2433 community technical & medical sales (excluding ICT)
-  actor (itonami actor pattern, ADR-2607011000 / CLAUDE.md Actors section).
+  actor (itonami actor pattern, ADR-2607011000 / AGENTS.md Actors section).
   Medical-sales twist: a claimed indication set must be a SUBSET of the
   registered approved-indications set — off-label marketing is a subset
   violation, not a sales technique — and a restricted product may only be sold
